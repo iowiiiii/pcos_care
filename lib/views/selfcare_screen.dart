@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'profile_screen.dart';
+import 'profile_screens/profile_screen.dart';
 import 'calendar_screen.dart';
 import 'home_screen.dart';
 

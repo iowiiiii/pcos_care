@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import '../controller/step_progress_indicator.dart';
+import '../../controller/step_progress_indicator.dart';
 import 'cycle_length_screen.dart';
 
 class PeriodDurationScreen extends StatefulWidget {

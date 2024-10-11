@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../controller/step_progress_indicator.dart';
+import '../../controller/step_progress_indicator.dart';
 import 'finish_setup_screen.dart';
 
 class LastPeriodScreen extends StatelessWidget {

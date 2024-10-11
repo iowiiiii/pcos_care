@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import '../home_screen.dart';
 
 class FinishSetupScreen extends StatelessWidget {
   final String name;

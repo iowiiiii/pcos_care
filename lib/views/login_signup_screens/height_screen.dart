@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../controller/step_progress_indicator.dart';
+import '../../controller/step_progress_indicator.dart';
 import 'period_duration_screen.dart';
 
 class HeightScreen extends StatefulWidget {

@@ -1,5 +1,6 @@
+import '../models/recommendations_model.dart';
 import 'package:flutter/material.dart';
-import 'profile_screen.dart';
+import 'profile_screens/profile_screen.dart';
 import 'home_screen.dart';
 import 'calendar_screen.dart';
 
@@ -202,12 +203,4 @@ class SelfCareScreen extends StatelessWidget {
       ),
     );
   }
-}
-
-class RecommendationItem {
-  final String title;
-  final String? author;
-  final String? buttonLabel;
-
-  RecommendationItem({required this.title, this.author, this.buttonLabel});
 }

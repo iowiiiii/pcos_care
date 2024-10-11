@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'profile_screen.dart';
+import 'profile_screens/profile_screen.dart';
 import 'calendar_screen.dart';
 import 'selfcare_screen.dart';
 
 void main() {
-  runApp(PCOSCareApp());
+  runApp(HomeScreenRun());
 }
 
-class PCOSCareApp extends StatelessWidget {
+class HomeScreenRun extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

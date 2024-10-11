@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'views/name_screen.dart';
+import 'views/login_signup_screens/name_screen.dart';
 
 void main() {
   runApp(PCOSCareApp());

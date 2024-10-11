@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../controller/step_progress_indicator.dart';
+import '../../controller/step_progress_indicator.dart';
 import 'last_period_screen.dart';
 
 class CycleLengthScreen extends StatefulWidget {

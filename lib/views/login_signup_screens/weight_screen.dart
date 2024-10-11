@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'height_screen.dart';
-import '../controller/step_progress_indicator.dart';
+import '../../controller/step_progress_indicator.dart';
 
 class WeightScreen extends StatefulWidget {
   final String name;

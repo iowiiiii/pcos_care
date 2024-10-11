@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../controller/step_progress_indicator.dart';
+import '../../controller/step_progress_indicator.dart';
 import 'birthday_screen.dart';
 
 class NameScreen extends StatelessWidget {
