@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'profile_goal_screen.dart';
-import 'profile_cycle_screen.dart';
-import 'profile_yob_screen.dart';
-import 'profile_symptoms_screen.dart';
-import 'profile_notification_screen.dart';
-import '../calendar_screen.dart';
-import '../selfcare_screen.dart';
-import '../home_screen.dart';
+import 'profile_screens/profile_goal_screen.dart';
+import 'profile_screens/profile_cycle_screen.dart';
+import 'profile_screens/profile_yob_screen.dart';
+import 'profile_screens/profile_symptoms_screen.dart';
+import 'profile_screens/profile_notification_screen.dart';
+import 'calendar_screen.dart';
+import 'selfcare_screen.dart';
+import 'home_screen.dart';
 
 
 class ProfileScreen extends StatefulWidget {

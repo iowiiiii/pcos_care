@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:pcos_care/views/selfcare_screen.dart';
+import 'selfcare_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'edit_period_days.dart';
-import 'profile_screens/profile_screen.dart';
+import 'profile_screen.dart';
 import 'home_screen.dart';
 import 'package:intl/intl.dart';
 
