@@ -3,8 +3,14 @@ import '../models/user_data_model.dart';
 import '../api/bmi_api.dart';
 import '../models/recommendations_model.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'home_screen.dart';
+import 'profile_screen.dart';
+import 'calendar_screen.dart';
 
 class SelfCareScreen extends StatelessWidget {
+
+  int _selectedIndex = 2;
+
   @override
   Widget build(BuildContext context) {
     // Fetch user data
@@ -67,13 +73,51 @@ class SelfCareScreen extends StatelessWidget {
         selectedItemColor: Color(0xFFD4A5A5),
         unselectedItemColor: Color(0xFFACACBA),
         type: BottomNavigationBarType.fixed,
-        currentIndex: 2, // Self-care tab
+        currentIndex: _selectedIndex, // Set the current index here
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: 'Calendar'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Self-Care'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Calendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Self-Care',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
         ],
+        onTap: (index) {
+            _selectedIndex = index; // Update the selected index
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen()),
+              );
+              break;
+            case 1:
+            // Stay on CalendarScreen
+              break;
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SelfCareScreen()),
+              );
+              break;
+            case 3:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen()),
+              );
+              break;
+          }
+        },
       ),
     );
   }
