@@ -102,7 +102,10 @@ class SelfCareScreen extends StatelessWidget {
               );
               break;
             case 1:
-            // Stay on CalendarScreen
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => CalendarScreen()),
+              );
               break;
             case 2:
               Navigator.pushReplacement(
