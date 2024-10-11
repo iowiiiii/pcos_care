@@ -7,10 +7,10 @@ import 'package:url_launcher/url_launcher.dart';
 class SelfCareScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Fetch user data (simulated)
+    // Fetch user data
     final userData = UserData.fetchData();
 
-    // Get BMI Status (simulated)
+    // Get BMI Status
     final bmiStatus = BMIStatus.getBMIStatus(userData.bmi);
 
     // Generate recommendations based on symptoms
@@ -41,13 +41,13 @@ class SelfCareScreen extends StatelessWidget {
                   title: "A Dietitian's Guide to Healthy Living",
                   author: 'Alicia Pacheco, RD',
                   buttonLabel: 'Read article',
-                  link: 'https://pcosnutritionistalyssa.com/7-day-pcos-diet-plan/', // Replace with actual link
+                  link: 'https://pcosnutritionistalyssa.com/7-day-pcos-diet-plan/',
                 ),
                 RecommendationItem(
                   title: 'Best PCOS Exercises',
                   author: 'Bridie Wilkins',
                   buttonLabel: 'Read article',
-                  link: 'https://www.womenshealthmag.com/uk/fitness/workouts/a40036309/exercise-for-pcos/', // Replace with actual link
+                  link: 'https://www.womenshealthmag.com/uk/fitness/workouts/a40036309/exercise-for-pcos/',
                 ),
               ],
             ),

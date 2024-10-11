@@ -105,8 +105,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                     borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
                   ),
-                  child:
-                  Padding(padding: const EdgeInsets.all(15),
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
                     child: ListView(
                       controller: scrollController,
                       children: [
@@ -139,7 +139,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          child: Text("MARK PERIODS", style: TextStyle(color: Colors.white70),),
+                          child: Text("MARK PERIODS", style: TextStyle(color: Colors.white70)),
                         ),
                         buildOptionsSection("Menstrual Flow", ["Light", "Moderate", "Heavy"], isSingleSelection: true),
                         buildOptionsSection("Symptoms", [
@@ -148,8 +148,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           "Migraine", "Frequent urination", "Diarrhea", "Constipation",
                           "Vaginal itching", "Vaginal burning",
                         ], isSingleSelection: false),
-                        buildOptionsSection("Mood", ["Indifferent", "Happy", "Sad", "Angry" ,"Stressed",
-                          "Anxious", "Melancholic", "Excited", "Productive", "Tired", "Lazy", "Libidinous",], isSingleSelection: false),
+                        buildOptionsSection("Mood", [
+                          "Indifferent", "Happy", "Sad", "Angry", "Stressed",
+                          "Anxious", "Melancholic", "Excited", "Productive", "Tired", "Lazy", "Libidinous",
+                        ], isSingleSelection: false),
                         buildOptionsSection("Vaginal Discharge", ["Spotting", "Sticky", "Creamy", "Egg-white", "Watery", "Atypical", "Bad odor"], isSingleSelection: false),
                         buildOptionsSection("Hormonal Pills", ["Pill taken", "Yesterday's pill"], isSingleSelection: true),
                       ],
