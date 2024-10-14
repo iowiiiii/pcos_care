@@ -100,8 +100,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Color.fromARGB(1, 118, 134, 150),
-                        Color.fromARGB(1, 118, 134, 150)
+                        Color.fromRGBO(213, 219, 239, 1.0),
+                        Color.fromRGBO(188, 198, 209, 1.0)
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
