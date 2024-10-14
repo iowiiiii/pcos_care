@@ -54,7 +54,7 @@ class NameScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color.fromRGBO(255, 111, 97, 100),
                 ),
-                child: Text('Next'),
+                child: Text('Next', style: TextStyle(color: Colors.white70)),
               ),
             ),
           ],

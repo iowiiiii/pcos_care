@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // For handling dates
+import 'package:pcos_care/views/edit_period_days.dart';
 import 'profile_screen.dart';
 import 'calendar_screen.dart';
 import 'selfcare_screen.dart';
@@ -17,9 +19,23 @@ class HomeScreenRun extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _weight = '52 KG'; // Default weight
+  double _height = 1.65; // Default height in meters
+  double _bmi = 19.9; // Default BMI value
+  String _classification = 'NORMAL'; // Default classification
+
   @override
   Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+    int currentDayIndex = now.weekday % 7; // 0: Sunday, 6: Saturday
+    DateTime startOfWeek = now.subtract(Duration(days: currentDayIndex));
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -41,7 +57,7 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Calendar Widget
+              // Calendar Widget (Week Days)
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -51,27 +67,28 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      'September',
+                      DateFormat.MMMM().format(now), // Display the current month
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: List.generate(7, (index) {
-                        // List of day names
-                        final days = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-                        // Start date (adjust as needed)
-                        int startDate = 29;
-                        // Calculate the date for each index
-                        int date = (startDate + index) % 31; // Assuming 31 days in the month
-                        if (date == 0) date = 1; // Adjust if the result is 0 (to show 1 instead)
+                        DateTime date = startOfWeek.add(Duration(days: index));
+                        String dayName = DateFormat.E().format(date); // Day name
+                        bool isToday = index == currentDayIndex;
 
                         return Column(
                           children: [
-                            Text(days[index]), // Day names
+                            Text(dayName), // Display day name (Sun, Mon, etc.)
                             CircleAvatar(
                               radius: 20,
-                              child: Text('$date'), // Display calculated date
+                              backgroundColor: isToday ? Colors.red : Colors.transparent,
+                              child: Text(
+                                date.day.toString(),
+                                style: TextStyle(
+                                  color: isToday ? Colors.white : Colors.black,
+                                ),
+                              ),
                             ),
                           ],
                         );
@@ -110,7 +127,9 @@ class HomeScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white, backgroundColor: Color(0xFFFF6F61), // Text color
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => EditPeriodDays()));
+                      },
                       child: Text('Edit Period Dates'),
                     ),
                   ],
@@ -133,49 +152,46 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('BMI', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                        Text('52 KG', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.red)),
+                        Text(_weight, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.red)),
                       ],
                     ),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Column( // Wrap this Column for the edit text and BMI text
-                          children: [
-                            GestureDetector( // Use GestureDetector to make the text clickable
-                              onTap: () {
-                                // Add your edit functionality here
-                              },
-                              child: Text(
-                                'Edit', // The clickable edit text
-                                style: TextStyle(fontSize: 10, color: Colors.grey), // Style it as you prefer
-                              ),
-                            ),
-                            Text('BMI: 19.9', style: TextStyle(fontSize: 18)),
-                          ],
+                        GestureDetector(
+                          onTap: () {
+                            _showBmiEditDialog();
+                          },
+                          child: Text(
+                            'Edit', // Clickable edit button
+                            style: TextStyle(fontSize: 10, color: Colors.grey),
+                          ),
                         ),
-                        Text('NORMAL', style: TextStyle(fontSize: 18, color: Colors.green)),
+                        Text('BMI: ${_bmi.toStringAsFixed(1)}', style: TextStyle(fontSize: 18)),
+                        Text(_classification, style: TextStyle(fontSize: 18, color: Colors.green)),
                       ],
                     ),
                   ],
                 ),
               ),
+
               SizedBox(height: 20),
 
-              // Menstrual Cycle Phases
+              // Menstrual Cycle Phases as Buttons
               Container(
                 decoration: BoxDecoration(
                   color: Color(0xFFFFFFFF).withOpacity(0.75),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: EdgeInsets.all(16.0), // Optional: Add padding to the container
+                padding: EdgeInsets.all(16.0),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // Align text to the start
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Menstrual Cycle Phases',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    SizedBox(height: 10), // Optional: Add some space between the text and grid
+                    SizedBox(height: 10),
                     GridView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
@@ -187,7 +203,6 @@ class HomeScreen extends StatelessWidget {
                       ),
                       itemCount: 4, // Now 4 items for a 2x2 grid
                       itemBuilder: (context, index) {
-                        // Create a list of menstrual phases
                         List<String> phases = [
                           'Menstrual Phase',
                           'Follicular Phase',
@@ -195,23 +210,28 @@ class HomeScreen extends StatelessWidget {
                           'Luteal Phase',
                         ];
 
-                        return Container(
-                          decoration: BoxDecoration(
-                            //Color Gradient
-                            gradient: const LinearGradient(
-                              colors: [
-                                Color(0xFFE2BCBB),
-                                Color(0xFFFE7F8D),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
+                        return GestureDetector(
+                          onTap: () {
+                            // Navigate to the respective phase screen based on the index
+                            _navigateToPhase(index);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color(0xFFE2BCBB),
+                                  Color(0xFFFE7F8D),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Center(
-                            child: Text(
-                              phases[index], // Display each phase based on the index
-                              textAlign: TextAlign.center,
+                            child: Center(
+                              child: Text(
+                                phases[index],
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ),
                         );
@@ -279,5 +299,67 @@ class HomeScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  // Function to show BMI edit dialog
+  void _showBmiEditDialog() {
+    TextEditingController weightController = TextEditingController(text: _weight.split(' ')[0]);
+    TextEditingController heightController = TextEditingController(text: _height.toString());
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Edit BMI'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: weightController,
+                decoration: InputDecoration(labelText: 'Weight (KG)'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: heightController,
+                decoration: InputDecoration(labelText: 'Height (M)'),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  _weight = '${weightController.text} KG';
+                  _height = double.parse(heightController.text);
+                  _bmi = _calculateBmi(double.parse(weightController.text), _height);
+                  _classification = _getBmiClassification(_bmi);
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Function to calculate BMI
+  double _calculateBmi(double weight, double height) {
+    return weight / (height * height);
+  }
+
+  // Function to get BMI classification
+  String _getBmiClassification(double bmi) {
+    if (bmi < 18.5) return 'UNDERWEIGHT';
+    if (bmi >= 18.5 && bmi < 24.9) return 'NORMAL';
+    if (bmi >= 25 && bmi < 29.9) return 'OVERWEIGHT';
+    return 'OBESE';
+  }
+
+  // Navigate to respective phase screen
+  void _navigateToPhase(int index) {
+    // Add navigation logic for each phase screen here
   }
 }

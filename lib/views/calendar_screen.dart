@@ -99,7 +99,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 return Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [Colors.blueGrey.shade100, Colors.blueGrey.shade300],
+                      colors: [
+                        Color.fromARGB(1, 118, 134, 150),
+                        Color.fromARGB(1, 118, 134, 150)
+                      ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -134,7 +137,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         ElevatedButton(
                           onPressed: () => widget._editPeriodDays(context), // Correctly calls the function
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.redAccent,
+                            backgroundColor: Color.fromRGBO(255,111,97,1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
                             ),

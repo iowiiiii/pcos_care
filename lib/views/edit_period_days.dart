@@ -80,7 +80,7 @@ class _EditPeriodDaysState extends State<EditPeriodDays> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child: Text('Save'),
+              child: Text('Save', style: TextStyle(color: Colors.white70)),
             ),
           ),
         ],
