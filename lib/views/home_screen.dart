@@ -4,6 +4,7 @@ import 'package:pcos_care/views/edit_period_days.dart';
 import 'profile_screen.dart';
 import 'calendar_screen.dart';
 import 'selfcare_screen.dart';
+import 'menstrual_cycle_screen.dart';
 
 void main() {
   runApp(HomeScreenRun());
@@ -177,7 +178,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: 20),
 
-              // Menstrual Cycle Phases as Buttons
+              // Menstrual Cycle Phases as Picture Buttons
               Container(
                 decoration: BoxDecoration(
                   color: Color(0xFFFFFFFF).withOpacity(0.75),
@@ -210,10 +211,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           'Luteal Phase',
                         ];
 
+                        List<String> images = [
+                          'assets/icons/menstrual.png',
+                          'assets/icons/follicular.png',
+                          'assets/icons/ovulation.png',
+                          'assets/icons/luteal.png',
+                        ];
+
                         return GestureDetector(
                           onTap: () {
-                            // Navigate to the respective phase screen based on the index
-                            _navigateToPhase(index);
+                            _navigateToPhase(index); // Call a function for navigation
                           },
                           child: Container(
                             decoration: BoxDecoration(
@@ -227,16 +234,20 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Center(
-                              child: Text(
-                                phases[index],
-                                textAlign: TextAlign.center,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12), // Match the container's radius
+                              child: Center(
+                                child: Image.asset(
+                                  images[index], // Display the image for the phase
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),
                         );
                       },
                     ),
+
                   ],
                 ),
               ),
@@ -360,6 +371,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Navigate to respective phase screen
   void _navigateToPhase(int index) {
-    // Add navigation logic for each phase screen here
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MenstrualCycleSlider(initialPage: index), // Pass index
+      ),
+    );
   }
 }
+
+
