@@ -1,26 +1,29 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // For handling dates
-import 'package:pcos_care/views/edit_period_days.dart';
+import 'package:intl/intl.dart'; 
+import 'package:csv/csv.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'edit_period_days.dart';
 import 'profile_screen.dart';
 import 'calendar_screen.dart';
 import 'selfcare_screen.dart';
 import 'menstrual_cycle_screen.dart';
-
-void main() {
-  runApp(HomeScreenRun());
-}
-
-class HomeScreenRun extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
-    );
-  }
-}
+import '../models/user_data_model.dart';
+import '../models/recommendations_model.dart';
 
 class HomeScreen extends StatefulWidget {
+  final UserData userData;
+  final List<String> symptoms;
+  final List<RecommendationItem> recommendations;
+
+  const HomeScreen({
+    Key? key,
+    required this.userData,
+    required this.symptoms,
+    required this.recommendations,
+  }) : super(key: key);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -30,11 +33,38 @@ class _HomeScreenState extends State<HomeScreen> {
   double _height = 1.65; // Default height in meters
   double _bmi = 19.9; // Default BMI value
   String _classification = 'NORMAL'; // Default classification
+  UserData? userData; // User data variable to hold the data loaded from CSV
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final path = '${directory.path}/user_data.csv';
+    final input = File(path).openRead();
+    final fields = await input
+        .transform(utf8.decoder)
+        .transform(CsvToListConverter())
+        .toList();
+
+    if (fields.isNotEmpty) {
+      setState(() {
+        _weight = '${fields[0][0]} KG';
+        _height = fields[0][1];
+        _bmi = fields[0][2];
+        _classification = fields[0][3];
+        userData = UserData.fromCsv(fields[0]);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     DateTime now = DateTime.now();
-    int currentDayIndex = now.weekday % 7; // 0: Sunday, 6: Saturday
+    int currentDayIndex = now.weekday % 7;
     DateTime startOfWeek = now.subtract(Duration(days: currentDayIndex));
 
     return Scaffold(
@@ -47,7 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.asset('assets/logo.png'), // Replace with logo
+          child: Image.asset('assets/logo.png'),
         ),
         centerTitle: true,
       ),
@@ -58,7 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Calendar Widget (Week Days)
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -68,19 +97,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   children: [
                     Text(
-                      DateFormat.MMMM().format(now), // Display the current month
+                      DateFormat.MMMM().format(now),
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: List.generate(7, (index) {
                         DateTime date = startOfWeek.add(Duration(days: index));
-                        String dayName = DateFormat.E().format(date); // Day name
+                        String dayName = DateFormat.E().format(date);
                         bool isToday = index == currentDayIndex;
 
                         return Column(
                           children: [
-                            Text(dayName), // Display day name (Sun, Mon, etc.)
+                            Text(dayName),
                             CircleAvatar(
                               radius: 20,
                               backgroundColor: isToday ? Colors.red : Colors.transparent,
@@ -107,7 +136,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 height: 187,
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  //Color Gradient
                   gradient: const LinearGradient(
                     colors: [
                       Color(0xFFE2BCBB),
@@ -139,7 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: 20),
 
-              // BMI Info
+              // BMI Info from CSV Data
               Container(
                 padding: EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -154,6 +182,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Text('BMI', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         Text(_weight, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.red)),
+                        Text('Height: $_height m', style: TextStyle(fontSize: 18)),
+                        Text('Classification: $_classification', style: TextStyle(fontSize: 16)),
                       ],
                     ),
                     Column(
@@ -164,12 +194,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             _showBmiEditDialog();
                           },
                           child: Text(
-                            'Edit', // Clickable edit button
+                            'Edit', 
                             style: TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                         ),
-                        Text('BMI: ${_bmi.toStringAsFixed(1)}', style: TextStyle(fontSize: 18)),
-                        Text(_classification, style: TextStyle(fontSize: 18, color: Colors.green)),
                       ],
                     ),
                   ],
@@ -178,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
               SizedBox(height: 20),
 
-              // Menstrual Cycle Phases as Picture Buttons
+              // Menstrual Cycle Phases
               Container(
                 decoration: BoxDecoration(
                   color: Color(0xFFFFFFFF).withOpacity(0.75),
@@ -194,60 +222,62 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: 10),
                     GridView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2, // 2 items per row
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 1.5,
-                      ),
-                      itemCount: 4, // Now 4 items for a 2x2 grid
-                      itemBuilder: (context, index) {
-                        List<String> phases = [
-                          'Menstrual Phase',
-                          'Follicular Phase',
-                          'Ovulation Phase',
-                          'Luteal Phase',
-                        ];
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2, 
+                          crossAxisSpacing: 10,
+                          mainAxisSpacing: 10,
+                          childAspectRatio: 1.5,
+                        ),
+                        itemCount: 4, 
+                        itemBuilder: (context, index) {
+                          List<String> phases = [
+                            'Menstrual Phase',
+                            'Follicular Phase',
+                            'Ovulation Phase',
+                            'Luteal Phase',
+                          ];
 
-                        List<String> images = [
-                          'assets/icons/menstrual.png',
-                          'assets/icons/follicular.png',
-                          'assets/icons/ovulation.png',
-                          'assets/icons/luteal.png',
-                        ];
+                          List<String> images = [
+                            'assets/icons/menstrual.png',
+                            'assets/icons/follicular.png',
+                            'assets/icons/ovulation.png',
+                            'assets/icons/luteal.png',
+                          ];
 
-                        return GestureDetector(
-                          onTap: () {
-                            _navigateToPhase(index); // Call a function for navigation
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFE2BCBB),
-                                  Color(0xFFFE7F8D),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12), // Match the container's radius
-                              child: Center(
-                                child: Image.asset(
-                                  images[index], // Display the image for the phase
-                                  fit: BoxFit.cover,
+                          return GestureDetector(
+                            onTap: () {
+                              _navigateToPhase(index);
+                            },
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFFE2BCBB),
+                                    Color(0xFFFE7F8D),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
                                 ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    images[index],
+                                    height: 50,
+                                    width: 50,
+                                  ),
+                                  SizedBox(height: 10),
+                                  Text(phases[index],
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                ],
                               ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-
+                          );
+                        }),
                   ],
                 ),
               ),
@@ -255,100 +285,85 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-
-      // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF262626),
-        selectedItemColor: Color(0xFFD4A5A5),
-        unselectedItemColor: Color(0xFFACACBA),
-        type: BottomNavigationBarType.fixed,
+        bottomNavigationBar: BottomNavigationBar(
         items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Self-Care',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Self-Care'),
         ],
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
-              );
-              break;
-            case 1:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => CalendarScreen()),
-              );
-              break;
-            case 2:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SelfCareScreen()),
-              );
-              break;
-            case 3:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
-              );
-              break;
-          }
+        selectedItemColor: Color(0xFFFF6F61),
+        unselectedItemColor: Colors.grey,
+      onTap: (index) {
+        switch (index) {
+          case 0:
+            break;
+          case 1:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CalendarScreen(
+                  userData: userData!,
+                ),
+              ),
+            );
+            break;
+          case 2:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SelfCareScreen(
+                  userData: userData!,
+                  symptoms: [],
+                  recommendations: [],
+                ),
+              ),
+            );
+            break;
+          case 3:
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ProfileScreen(
+                  userData: userData!,
+                  symptoms: [],
+                  recommendations: [],
+                ),
+              ),
+            );
+            break;
+        }
         },
       ),
     );
   }
 
-  // Function to show BMI edit dialog
+  // BMI Edit Dialog
   void _showBmiEditDialog() {
-    TextEditingController weightController = TextEditingController(text: _weight.split(' ')[0]);
-    TextEditingController heightController = TextEditingController(text: _height.toString());
-
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
+        String weight = _weight.split(' ')[0];
         return AlertDialog(
-          title: Text('Edit BMI'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: weightController,
-                decoration: InputDecoration(labelText: 'Weight (KG)'),
-                keyboardType: TextInputType.number,
-              ),
-              TextField(
-                controller: heightController,
-                decoration: InputDecoration(labelText: 'Height (M)'),
-                keyboardType: TextInputType.number,
-              ),
-            ],
+          title: Text('Edit Weight'),
+          content: TextField(
+            onChanged: (value) {
+              weight = value;
+            },
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(hintText: 'Enter your weight in KG'),
           ),
-          actions: [
-            TextButton(
+          actions: <Widget>[
+            ElevatedButton(
+              child: Text('Save'),
               onPressed: () {
                 setState(() {
-                  _weight = '${weightController.text} KG';
-                  _height = double.parse(heightController.text);
-                  _bmi = _calculateBmi(double.parse(weightController.text), _height);
-                  _classification = _getBmiClassification(_bmi);
+                  _weight = '$weight KG';
+                  _bmi = _calculateBMI(double.parse(weight), _height);
+                  _classification = _classifyBMI(_bmi);
                 });
                 Navigator.of(context).pop();
               },
-              child: Text('Save'),
             ),
           ],
         );
@@ -356,28 +371,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Function to calculate BMI
-  double _calculateBmi(double weight, double height) {
+  // BMI Calculation
+  double _calculateBMI(double weight, double height) {
     return weight / (height * height);
   }
 
-  // Function to get BMI classification
-  String _getBmiClassification(double bmi) {
+  // BMI Classification Logic
+  String _classifyBMI(double bmi) {
     if (bmi < 18.5) return 'UNDERWEIGHT';
     if (bmi >= 18.5 && bmi < 24.9) return 'NORMAL';
     if (bmi >= 25 && bmi < 29.9) return 'OVERWEIGHT';
     return 'OBESE';
   }
 
-  // Navigate to respective phase screen
   void _navigateToPhase(int index) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => MenstrualCycleSlider(initialPage: index), // Pass index
-      ),
+      MaterialPageRoute(builder: (context) => MenstrualCycleSlider(phaseIndex: index)),
     );
   }
 }
-
-
