@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../controller/step_progress_indicator.dart';
 import 'period_duration_screen.dart';
+import '../../controller/csv_manager.dart';
 
 class HeightScreen extends StatefulWidget {
   final String name;
+  final double weight;
+  final int age;
 
-  HeightScreen({required this.name});
+  HeightScreen({required this.name, required this.weight, required this.age});
 
   @override
   _HeightScreenState createState() => _HeightScreenState();
@@ -14,6 +17,7 @@ class HeightScreen extends StatefulWidget {
 class _HeightScreenState extends State<HeightScreen> {
   bool isCmSelected = true;
   final TextEditingController _heightController = TextEditingController();
+  double? bmi;
 
   @override
   Widget build(BuildContext context) {
@@ -74,17 +78,32 @@ class _HeightScreenState extends State<HeightScreen> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color.fromRGBO(70, 80, 90, 245),
-                  hintText: 'Your Weight',
+                  hintText: 'Your Height',
                   border: OutlineInputBorder(),
                 ),
+                keyboardType: TextInputType.number,
               ),
               Spacer(),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => PeriodDurationScreen(name: _heightController.text)));
+                  onPressed: () async {
+                    double height = double.tryParse(_heightController.text) ?? 0;
+                    double heightInMeters = isCmSelected ? height / 100 : height * 0.3048; // Convert ft to m
+                    bmi = calculateBMI(widget.weight, heightInMeters); // Calculate BMI
+
+                    if (bmi != null) {
+                      CSVManager csvManager = CSVManager();
+
+                      await csvManager.addHeightAndBmiToCSV(widget.name, widget.age, heightInMeters, bmi!);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PeriodDurationScreen(name: widget.name, bmi: bmi!), // Pass BMI
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromRGBO(255, 111, 97, 100),
@@ -97,6 +116,13 @@ class _HeightScreenState extends State<HeightScreen> {
         ),
       ),
     );
+  }
+
+  double calculateBMI(double weight, double height) {
+    if (height > 0) {
+      return weight / (height * height);
+    }
+    return 0;
   }
 
   Widget _buildToggleButton({
