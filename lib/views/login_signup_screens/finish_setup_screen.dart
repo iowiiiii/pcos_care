@@ -1,27 +1,11 @@
 import 'package:flutter/material.dart';
 import '../home_screen.dart';
+import '../../models/user_data_model.dart';
 
-class FinishSetupScreen extends StatefulWidget {
+class FinishSetupScreen extends StatelessWidget {
   final String name;
-
-  FinishSetupScreen({required this.name});
-
-  @override
-  _FinishSetupScreenState createState() => _FinishSetupScreenState();
-}
-
-class _FinishSetupScreenState extends State<FinishSetupScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Delay of 5 seconds before navigating to HomeScreen
-    Future.delayed(Duration(seconds: 5), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
-    });
-  }
+  final UserData userData;
+  FinishSetupScreen({required this.name, required this.userData});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +16,13 @@ class _FinishSetupScreenState extends State<FinishSetupScreen> {
           onTap: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => HomeScreen()),
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(
+                  userData: userData,
+                  symptoms: userData.symptoms,
+                  recommendations: [],
+                ),
+              ),
             );
           },
           child: Center(
@@ -46,7 +36,10 @@ class _FinishSetupScreenState extends State<FinishSetupScreen> {
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
-                Text('This may take a while', style: TextStyle(fontSize: 14)),
+                Text(
+                  'This may take a while',
+                  style: TextStyle(fontSize: 14),
+                ),
               ],
             ),
           ),
