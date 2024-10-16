@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../../controller/csv_manager.dart';
 import '../../controller/step_progress_indicator.dart';
 import 'finish_setup_screen.dart';
-import 'package:intl/intl.dart'; // For date formatting
 
 class LastPeriodScreen extends StatefulWidget {
   final String name;
@@ -13,22 +14,11 @@ class LastPeriodScreen extends StatefulWidget {
 }
 
 class _LastPeriodScreenState extends State<LastPeriodScreen> {
-  DateTime? _selectedDate; // Store the selected date
+  DateTime _focusedDay = DateTime.now();
+  List<DateTime> _selectedDays = [];
+  final CSVManager csvManager = CSVManager();
 
-  // Function to show the date picker
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(), // Current date
-      firstDate: DateTime(2000), // Earliest date the user can select
-      lastDate: DateTime.now(),  // Latest date (today)
-    );
-    if (pickedDate != null && pickedDate != _selectedDate) {
-      setState(() {
-        _selectedDate = pickedDate;
-      });
-    }
-  }
+  get userData => null;
 
   @override
   Widget build(BuildContext context) {
@@ -52,58 +42,59 @@ class _LastPeriodScreenState extends State<LastPeriodScreen> {
             children: [
               SizedBox(height: 20),
               StepProgressIndicator(currentStep: 7),
-              SizedBox(height: 50),
-              Text('When was your last period?', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              SizedBox(height: 30),
+              Text(
+                'When was your last period?',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 20),
-
-              // Date display and select button
-              GestureDetector(
-                onTap: () => _selectDate(context),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 20, horizontal: 30),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        _selectedDate == null
-                            ? 'Select Date'
-                            : DateFormat.yMMMd().format(_selectedDate!), // Display formatted date
-                        style: TextStyle(fontSize: 18, color: Colors.black54),
-                      ),
-                      Icon(Icons.calendar_today, color: Colors.grey),
-                    ],
+              // Calendar Widget
+              TableCalendar(
+                firstDay: DateTime.utc(2010, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                focusedDay: _focusedDay,
+                calendarFormat: CalendarFormat.month,
+                selectedDayPredicate: (day) {
+                  return _selectedDays.contains(day);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  setState(() {
+                    if (_selectedDays.contains(selectedDay)) {
+                      _selectedDays.remove(selectedDay);
+                    } else {
+                      _selectedDays.add(selectedDay);
+                    }
+                    _focusedDay = focusedDay; 
+                  });
+                },
+                calendarStyle: CalendarStyle(
+                  isTodayHighlighted: true,
+                  selectedDecoration: BoxDecoration(
+                    color: Colors.redAccent,
+                    shape: BoxShape.circle,
                   ),
                 ),
               ),
-
               Spacer(),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    if (_selectedDate != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FinishSetupScreen(name: widget.name),
-                        ),
-                      );
-                    } else {
-                      // Show a warning if no date is selected
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Please select the date of your last period')),
-                      );
-                    }
+                  onPressed: () async {
+                    List<String> periodDates = _selectedDays.map((day) => day.toIso8601String()).toList();
+                    
+                    await csvManager.addToCSV([widget.name, '', '', '', '', '', '', '', periodDates.join(', ')]);
+                    
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FinishSetupScreen(name: widget.name, userData: userData,),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromRGBO(255, 111, 97, 100),
                   ),
-                  child: Text('Next', style: TextStyle(color: Colors.white70)),
+                  child: Text('Next'),
                 ),
               ),
             ],
