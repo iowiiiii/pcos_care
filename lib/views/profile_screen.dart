@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'profile_screens/profile_goal_screen.dart';
 import 'profile_screens/profile_cycle_screen.dart';
 import 'profile_screens/profile_yob_screen.dart';
@@ -7,38 +8,62 @@ import 'profile_screens/profile_notification_screen.dart';
 import 'calendar_screen.dart';
 import 'selfcare_screen.dart';
 import 'home_screen.dart';
-
+import '../models/user_data_model.dart';
 
 class ProfileScreen extends StatefulWidget {
+  final UserData userData;
+
+  const ProfileScreen({Key? key, required this.userData, required List symptoms, required List recommendations}) : super(key: key);
+
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int _selectedIndex = 3; // Set initial index for Profile tab
+  void initState() {
+    super.initState();
+  }
 
   void _onItemTapped(int index) {
     switch (index) {
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                HomeScreen(
+                  userData: widget.userData,
+                  symptoms: widget.userData.symptoms,
+                  recommendations: [],
+                ),
+          ),
         );
         break;
       case 1:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => CalendarScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                CalendarScreen(
+                  userData: widget.userData,
+                ),
+          ),
         );
         break;
       case 2:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => SelfCareScreen()),
+          MaterialPageRoute(
+            builder: (context) =>
+                SelfCareScreen(
+                  userData: widget.userData,
+                  symptoms: widget.userData.symptoms,
+                  recommendations: [],
+                ),
+          ),
         );
         break;
       case 3:
-      // Do nothing; already on ProfileScreen
         break;
     }
   }
@@ -53,11 +78,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.asset('assets/logo.png'), // Replace with your logo
+          child: Image.asset('assets/logo.png'), 
         ),
-        actions: [
-          //if may gustong lagay dito
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -79,49 +101,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                _buildProfileItem(context, 'Goal', GoalScreen()),  // Navigate to GoalScreen
-                _buildProfileItem(context, 'Cycle', CycleScreen()),  // Navigate to CycleScreen
-                _buildProfileItem(context, 'Year of birth', YearBirthScreen()),
-                _buildProfileItem(context, 'Symptoms order', SymptomsScreen()),
-                _buildProfileItem(context, 'Notifications', NotificationScreen()),
+                _buildProfileItem(
+                    context, 'Goal', GoalScreen(), widget.userData.goal),
+                _buildProfileItem(
+                    context, 'Cycle', CycleScreen(), widget.userData.cycle),
+                _buildProfileItem(context, 'Year of birth', YearBirthScreen(),
+                    widget.userData.yearOfBirth.toString()),
+                _buildProfileItem(context, 'Symptoms order', SymptomsScreen(),
+                    widget.userData.symptoms.join(", ")),
+                _buildProfileItem(
+                    context, 'Notifications', NotificationScreen(),
+                    widget.userData.notifications ? "On" : "Off"),
               ],
             ),
           ),
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF262626),
-        selectedItemColor: const Color(0xFFD4A5A5),  // Color for the selected icon
-        unselectedItemColor: const Color(0xFFACACBA),  // Color for unselected icons
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
+              icon: Icon(Icons.calendar_today), label: 'Calendar'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Self-Care',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
+              icon: Icon(Icons.favorite), label: 'Self-Care'),
         ],
+        selectedItemColor: Color(0xFFFF6F61),
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped, 
       ),
     );
   }
 
-  Widget _buildProfileItem(BuildContext context, String title, Widget destination) {
+  Widget _buildProfileItem(BuildContext context, String title,
+      Widget destination, String? data) {
     return ListTile(
       leading: const Icon(Icons.star_border),
-      title: Text(title),
+      title: Text('$title: ${data ?? "Not set"}'), 
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.push(
