@@ -1,251 +1,43 @@
 import 'package:flutter/material.dart';
-import '../models/user_data_model.dart';
-import '../api/bmi_api.dart';
 import '../models/recommendations_model.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'home_screen.dart';
-import 'profile_screen.dart';
-import 'calendar_screen.dart';
+import '/models/user_data_model.dart';
+
 
 class SelfCareScreen extends StatelessWidget {
+  final List<RecommendationItem> recommendations;
+  final UserData userData;
+  final List<String> symptoms;
 
-  int _selectedIndex = 2;
+  const SelfCareScreen({
+    Key? key,
+    required this.recommendations,
+    required this.userData,
+    required this.symptoms,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Fetch user data
-    final userData = UserData.fetchData();
-
-    // Get BMI Status
-    final bmiStatus = BMIStatus.getBMIStatus(userData.bmi);
-
-    // Generate recommendations based on symptoms
-    final symptomRecommendations = _generateSymptomRecommendations(userData.symptom);
-
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        title: Text('PCOS CARE', style: TextStyle(color: Colors.black)),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Recommendations',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            SizedBox(height: 16),
-            buildRecommendationCard(
-              title: 'BMI',
-              status: bmiStatus['status'],
-              statusColor: _getStatusColor(bmiStatus['statusColor']),
-              description: bmiStatus['description'],
-              recommendations: [
-                RecommendationItem(
-                  title: "A Dietitian's Guide to Healthy Living",
-                  author: 'Alicia Pacheco, RD',
-                  buttonLabel: 'Read article',
-                  link: 'https://pcosnutritionistalyssa.com/7-day-pcos-diet-plan/',
-                ),
-                RecommendationItem(
-                  title: 'Best PCOS Exercises',
-                  author: 'Bridie Wilkins',
-                  buttonLabel: 'Read article',
-                  link: 'https://www.womenshealthmag.com/uk/fitness/workouts/a40036309/exercise-for-pcos/',
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            buildRecommendationCard(
-              title: 'Symptoms',
-              status: 'Alert',
-              statusColor: Colors.orange,
-              description: 'Based on your reported symptom: ${userData.symptom}, here are some recommendations:',
-              recommendations: symptomRecommendations,
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF262626),
-        selectedItemColor: Color(0xFFD4A5A5),
-        unselectedItemColor: Color(0xFFACACBA),
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex, // Set the current index here
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Self-Care',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-            _selectedIndex = index; // Update the selected index
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
-              );
-              break;
-            case 1:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => CalendarScreen()),
-              );
-              break;
-            case 2:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SelfCareScreen()),
-              );
-              break;
-            case 3:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
-              );
-              break;
-          }
+      appBar: AppBar(title: Text('Self-Care Recommendations')),
+      body: ListView.builder(
+        itemCount: recommendations.length,
+        itemBuilder: (context, index) {
+          final recommendation = recommendations[index];
+          return ListTile(
+            title: Text(recommendation.title),
+            subtitle: recommendation.author != null ? Text('By: ${recommendation.author}') : null,
+            trailing: recommendation.buttonLabel != null
+                ? TextButton(
+              onPressed: () {
+                if (recommendation.link != null) {
+                  // launch link
+                }
+              },
+              child: Text(recommendation.buttonLabel!),
+            )
+                : null,
+          );
         },
-      ),
-    );
-  }
-
-  // Helper method to get color from status
-  Color _getStatusColor(String statusColor) {
-    switch (statusColor) {
-      case 'green':
-        return Colors.green;
-      case 'orange':
-        return Colors.orange;
-      case 'red':
-        return Colors.red;
-      default:
-        return Colors.yellow;
-    }
-  }
-
-  // Generate symptom-based recommendations
-  List<RecommendationItem> _generateSymptomRecommendations(String symptom) {
-    if (symptom == 'Headache') {
-      return [
-        RecommendationItem(title: 'Get enough rest and sleep'),
-        RecommendationItem(title: 'Stay well hydrated with water'),
-        RecommendationItem(title: 'Seek medical care'),
-      ];
-    } else if (symptom == 'Fatigue') {
-      return [
-        RecommendationItem(title: 'Increase iron intake in your diet'),
-        RecommendationItem(title: 'Exercise regularly'),
-      ];
-    } else {
-      return [
-        RecommendationItem(title: 'Consult a healthcare professional'),
-      ];
-    }
-  }
-
-  // The recommendation card widget
-  Widget buildRecommendationCard({
-    required String title,
-    required String status,
-    required Color statusColor,
-    required String description,
-    required List<RecommendationItem> recommendations,
-  }) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(title,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(width: 8),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    status,
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8),
-            Text(description),
-            SizedBox(height: 16),
-            Column(
-              children: recommendations.map((rec) => buildRecommendationItem(rec)).toList(),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // The recommendation item widget
-  Widget buildRecommendationItem(RecommendationItem item) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: item.buttonLabel == null
-          ? Row(
-        children: [
-          Icon(Icons.circle, size: 8, color: Colors.teal),
-          SizedBox(width: 8),
-          Expanded(child: Text(item.title)),
-        ],
-      )
-          : Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item.title, style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("By: ${item.author}"),
-              ],
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final url = item.link!;
-              if (await canLaunch(url)) {
-                await launch(url);
-              } else {
-                throw 'Could not launch $url';
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.teal,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Text(item.buttonLabel!),
-          ),
-        ],
       ),
     );
   }
