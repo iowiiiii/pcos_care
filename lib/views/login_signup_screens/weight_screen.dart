@@ -1,19 +1,33 @@
 import 'package:flutter/material.dart';
-import 'height_screen.dart';
+import 'package:flutter/cupertino.dart';
 import '../../controller/step_progress_indicator.dart';
+import '../../controller/csv_manager.dart';
+import 'weight_screen.dart';
 
-class WeightScreen extends StatefulWidget {
+class BirthdayScreen extends StatefulWidget {
   final String name;
 
-  WeightScreen({required this.name});
+  BirthdayScreen({required this.name});
 
   @override
-  _WeightScreenState createState() => _WeightScreenState();
+  _BirthdayScreenState createState() => _BirthdayScreenState();
 }
 
-class _WeightScreenState extends State<WeightScreen> {
-  bool isKgSelected = true;
-  final TextEditingController _weightController = TextEditingController();
+class _BirthdayScreenState extends State<BirthdayScreen> {
+  int selectedMonth = 1;
+  int selectedDay = 1;
+  int selectedYear = 2000;
+
+  List<int> days = List.generate(31, (index) => index + 1);
+  List<int> years = List.generate(100, (index) => DateTime.now().year - index);
+
+  CSVManager csvManager = CSVManager();
+
+  @override
+  void initState() {
+    super.initState();
+    csvManager.initializeCSV(widget.name);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,103 +40,90 @@ class _WeightScreenState extends State<WeightScreen> {
           },
         ),
         title: Text('Setup Your Profile', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Color.fromRGBO(230, 230, 250, 100),
         centerTitle: true,
+        backgroundColor: Color.fromRGBO(230, 230, 250, 100),
       ),
       body: Material(
         color: Color.fromRGBO(230, 230, 250, 100),
         child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            SizedBox(height: 20),
-            StepProgressIndicator(currentStep: 3),
-            SizedBox(height: 200),
-            Text(
-              'Enter your weight:',
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildToggleButton(
-                  label: 'kg',
-                  isSelected: isKgSelected,
-                  onTap: () {
-                    setState(() {
-                      isKgSelected = true;
-                    });
-                  },
-                ),
-                SizedBox(width: 10),
-                _buildToggleButton(
-                  label: 'lb',
-                  isSelected: !isKgSelected,
-                  onTap: () {
-                    setState(() {
-                      isKgSelected = false;
-                    });
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            TextField(
-              textAlign: TextAlign.center,
-              controller: _weightController,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Color.fromRGBO(70, 80, 90, 245),
-                hintText: 'Your Weight',
-                border: OutlineInputBorder(),
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              SizedBox(height: 20),
+              StepProgressIndicator(currentStep: 2),
+              SizedBox(height: 210),
+              Text(
+                'When is your birthday?',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-            ),
-            Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => HeightScreen(name: _weightController.text)),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(255, 111, 97, 100),
-                ),
-                child: Text('Next', style: TextStyle(color: Colors.white70)),
+              SizedBox(height: 65),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: CupertinoPicker(
+                      itemExtent: 50,
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          selectedMonth = index + 1;
+                        });
+                      },
+                      children: List.generate(12, (index) {
+                        return Center(child: Text('${index + 1}'));
+                      }),
+                    ),
+                  ),
+                  Expanded(
+                    child: CupertinoPicker(
+                      itemExtent: 50,
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          selectedDay = index + 1;
+                        });
+                      },
+                      children: List.generate(days.length, (index) {
+                        return Center(child: Text('${days[index]}'));
+                      }),
+                    ),
+                  ),
+                  Expanded(
+                    child: CupertinoPicker(
+                      itemExtent: 50,
+                      onSelectedItemChanged: (index) {
+                        setState(() {
+                          selectedYear = years[index];
+                        });
+                      },
+                      children: List.generate(years.length, (index) {
+                        return Center(child: Text('${years[index]}'));
+                      }),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
-      ),
-    );
-  }
+              Spacer(),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    DateTime birthday = DateTime(selectedYear, selectedMonth, selectedDay);
+                    int age = csvManager.calculateAge(birthday);
+                    await csvManager.addBirthdayAndAge(birthday);
 
-  Widget _buildToggleButton({
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? Color.fromRGBO(255, 111, 97, 100)
-              : Colors.white, // Toggle between selected and unselected color
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Color.fromRGBO(255, 111, 97, 100), // Border color
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Color.fromRGBO(255, 111, 97, 100),
-            fontWeight: FontWeight.bold,
+
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => WeightScreen(name: widget.name, age: age)),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(255, 111, 97, 100),
+                  ),
+                  child: Text('Next', style: TextStyle(color: Colors.white70)),
+                ),
+              ),
+            ],
           ),
         ),
       ),
