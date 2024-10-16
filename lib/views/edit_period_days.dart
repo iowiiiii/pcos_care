@@ -8,7 +8,7 @@ class EditPeriodDays extends StatefulWidget {
 
 class _EditPeriodDaysState extends State<EditPeriodDays> {
   DateTime _focusedDay = DateTime.now();
-  List<DateTime> _markedDays = [DateTime.now()]; // Start with the current day marked
+  List<DateTime> _markedDays = [DateTime.now()];
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,6 @@ class _EditPeriodDaysState extends State<EditPeriodDays> {
               setState(() {
                 _focusedDay = focusedDay;
 
-                // Toggle marking/unmarking the selected day
                 if (_markedDays.contains(selectedDay)) {
                   _markedDays.remove(selectedDay);
                 } else {
@@ -71,7 +70,6 @@ class _EditPeriodDaysState extends State<EditPeriodDays> {
             padding: const EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: () {
-                // Logic to save the marked days
                 Navigator.pop(context);
               },
               style: ElevatedButton.styleFrom(
@@ -80,7 +78,7 @@ class _EditPeriodDaysState extends State<EditPeriodDays> {
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
-              child: Text('Save', style: TextStyle(color: Colors.white70)),
+              child: Text('Save'),
             ),
           ),
         ],
