@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../../controller/step_progress_indicator.dart';
+import '../../controller/csv_manager.dart';
 import 'weight_screen.dart';
 
 class BirthdayScreen extends StatefulWidget {
@@ -20,6 +21,14 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
   List<int> days = List.generate(31, (index) => index + 1);
   List<int> years = List.generate(100, (index) => DateTime.now().year - index);
 
+  CSVManager csvManager = CSVManager();
+
+  @override
+  void initState() {
+    super.initState();
+    csvManager.initializeCSV(widget.name);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,7 +42,6 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
         title: Text('Setup Your Profile', style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Color.fromRGBO(230, 230, 250, 100),
-
       ),
       body: Material(
         color: Color.fromRGBO(230, 230, 250, 100),
@@ -46,8 +54,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
               SizedBox(height: 210),
               Text(
                 'When is your birthday?',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold
-                ),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 65),
               Row(
@@ -98,11 +105,16 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    DateTime birthday = DateTime(selectedYear, selectedMonth, selectedDay);
+                    int age = csvManager.calculateAge(birthday);
+                    await csvManager.addBirthdayAndAge(birthday);
+
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => WeightScreen(name: widget.name)),
+                          builder: (context) => WeightScreen(name: widget.name, age: age)),
                     );
                   },
                   style: ElevatedButton.styleFrom(
