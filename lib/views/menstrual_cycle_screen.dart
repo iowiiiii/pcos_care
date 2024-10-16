@@ -1,24 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pcos_care/views/home_screen.dart';
 
-void main() {
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MenstrualCycleSlider(),
-    );
-  }
-}
-
 class MenstrualCycleSlider extends StatelessWidget {
   final int initialPage;
 
-  MenstrualCycleSlider({this.initialPage = 0}); // Default is the first phase
+  MenstrualCycleSlider({this.initialPage = 0, required int phaseIndex});
 
   final List<Widget> phases = [
     MenstrualPhase(),
@@ -29,12 +15,11 @@ class MenstrualCycleSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize the PageController with the provided initial page
     PageController _pageController = PageController(initialPage: initialPage);
 
     return Scaffold(
       body: PageView(
-        controller: _pageController,  // Use the controller for sliding pages
+        controller: _pageController,
         children: phases,
       ),
     );
@@ -51,7 +36,7 @@ class MenstrualPhase extends StatelessWidget {
       symptoms: 'You may experience cramps, fatigue, mood swings, and lower back pain.',
       fertilizationChance: 'Low',
       fertilizationDescription: 'Very low; your body is shedding the unfertilized egg.',
-      imagePath: 'assets/menstrual_cycle/Mens.png', // Add your image path here
+      imagePath: 'assets/menstrual_cycle/Mens.png',
       phaseStatus: 'Current phase',
     );
   }
@@ -121,30 +106,36 @@ class PhaseTemplate extends StatelessWidget {
     required this.imagePath,
   });
 
+  get userData => null;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        color: const Color(0xFFFFFFFF), // Set your background color here
+        color: const Color(0xFFFFFFFF),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 25),
-            // AppBar substitute (X icon and phase name)
+
             Align(
               alignment: Alignment.topLeft,
               child: IconButton(
                 icon: Icon(Icons.close),
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => HomeScreen()),
+                    MaterialPageRoute(builder: (context) => HomeScreen(
+                      userData: userData,
+                      symptoms: userData.symptoms,
+                      recommendations: [],
+                    ),),
                   );
                 },
               ),
             ),
-            Image.asset(imagePath, height: 200), // Phase image
+            Image.asset(imagePath, height: 200),
             SizedBox(height: 20),
             Text(
               phaseName,
@@ -156,7 +147,6 @@ class PhaseTemplate extends StatelessWidget {
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 16),
-            // What Happens Card
             PhaseInfoCard(
               title: 'What Happens:',
               content: description,
@@ -229,4 +219,3 @@ class PhaseInfoCard extends StatelessWidget {
     );
   }
 }
-
