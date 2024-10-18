@@ -1,20 +1,11 @@
 import 'package:flutter/material.dart';
-import 'selfcare_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'edit_period_days.dart';
-import 'profile_screen.dart';
-import 'home_screen.dart';
 import 'package:intl/intl.dart';
+import 'csv_manager.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
-
-  void _editPeriodDays(BuildContext context) async {
-    await Navigator.push(
-      context, MaterialPageRoute(builder: (context) => EditPeriodDays()),
-    );
-  }
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
@@ -23,18 +14,37 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _focusedDay = DateTime.now();
   Map<String, String> optionsSelected = {
     "Menstrual Flow": "",
-    "Hormonal Pills": "",
   };
   Map<String, List<String>> multiOptionsSelected = {
     "Symptoms": [],
-    "Mood": [],
-    "Vaginal Discharge": [],
   };
 
-  // Track the selected index
-  int _selectedIndex = 1; // 1 corresponds to the Calendar tab
-
   bool _isScrollSheetVisible = true;
+  CSVManager csvManager = CSVManager();
+
+  @override
+  void initState() {
+    super.initState();
+    csvManager.initializeCSV('userName');
+  }
+
+  Future<void> saveDataToCSV() async {
+    String menstrualFlow = optionsSelected["Menstrual Flow"] ?? "";
+    List<String> symptoms = multiOptionsSelected["Symptoms"] ?? [];
+
+    // Prepare the data to be saved
+    List<String> newData = [
+      DateFormat('yyyy-MM-dd').format(_selectedDay),  // Date
+      menstrualFlow,                                  // Menstrual flow
+      symptoms.join(', ')                             // Symptoms
+    ];
+
+    await csvManager.addToCSV(newData);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Data saved successfully!')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +53,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text('PCOS CARE', style: TextStyle(color: Colors.black)),
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset('assets/logo.png'), //logo
-        ),
         centerTitle: true,
       ),
       body: Stack(
@@ -80,10 +86,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   selectedDecoration: BoxDecoration(
                     color: Colors.grey[600],
-                    shape: BoxShape.circle,
-                  ),
-                  markerDecoration: BoxDecoration(
-                    color: Colors.black,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -134,16 +136,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ],
                           ),
                         ),
-                        ElevatedButton(
-                          onPressed: () => widget._editPeriodDays(context), // Correctly calls the function
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromRGBO(255,111,97,1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: Text("MARK PERIODS", style: TextStyle(color: Colors.white70)),
-                        ),
                         buildOptionsSection("Menstrual Flow", ["Light", "Moderate", "Heavy"], isSingleSelection: true),
                         buildOptionsSection("Symptoms", [
                           "Acne", "Headache", "Backache", "Cramps", "Fatigue", "Nausea",
@@ -151,12 +143,16 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           "Migraine", "Frequent urination", "Diarrhea", "Constipation",
                           "Vaginal itching", "Vaginal burning",
                         ], isSingleSelection: false),
-                        buildOptionsSection("Mood", [
-                          "Indifferent", "Happy", "Sad", "Angry", "Stressed",
-                          "Anxious", "Melancholic", "Excited", "Productive", "Tired", "Lazy", "Libidinous",
-                        ], isSingleSelection: false),
-                        buildOptionsSection("Vaginal Discharge", ["Spotting", "Sticky", "Creamy", "Egg-white", "Watery", "Atypical", "Bad odor"], isSingleSelection: false),
-                        buildOptionsSection("Hormonal Pills", ["Pill taken", "Yesterday's pill"], isSingleSelection: true),
+                        ElevatedButton(
+                          onPressed: saveDataToCSV, 
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromRGBO(255, 111, 97, 1),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                          ),
+                          child: Text("SAVE DATA", style: TextStyle(color: Colors.white70)),
+                        ),
                       ],
                     ),
                   ),
@@ -164,59 +160,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
               },
             ),
         ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color(0xFF262626),
-        selectedItemColor: Color(0xFFD4A5A5),
-        unselectedItemColor: Color(0xFFACACBA),
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex, // Set the current index here
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Calendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Self-Care',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index; // Update the selected index
-          });
-          switch (index) {
-            case 0:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
-              );
-              break;
-            case 1:
-            // Stay on CalendarScreen
-              break;
-            case 2:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => SelfCareScreen()),
-              );
-              break;
-            case 3:
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileScreen()),
-              );
-              break;
-          }
-        },
       ),
     );
   }
