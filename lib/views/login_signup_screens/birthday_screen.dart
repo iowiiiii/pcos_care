@@ -28,12 +28,6 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
   CSVManager csvManager = CSVManager();
 
   @override
-  void initState() {
-    super.initState();
-    csvManager.initializeCSV(widget.name);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -70,16 +64,16 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                       children: [
                         Text('MM', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         SizedBox(
-                          height: 150, // Adjust height for better visibility
+                          height: 150,
                           child: CupertinoPicker(
                             itemExtent: 50,
                             onSelectedItemChanged: (index) {
                               setState(() {
-                                selectedMonth = index + 1; // Months are 1-indexed
+                                selectedMonth = index + 1;
                               });
                             },
                             children: List.generate(months.length, (index) {
-                              return Center(child: Text(months[index])); // Display month names
+                              return Center(child: Text(months[index]));
                             }),
                           ),
                         ),
@@ -92,16 +86,16 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                       children: [
                         Text('DD', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         SizedBox(
-                          height: 150, // Adjust height for better visibility
+                          height: 150,
                           child: CupertinoPicker(
                             itemExtent: 50,
                             onSelectedItemChanged: (index) {
                               setState(() {
-                                selectedDay = index + 1; // Days are 1-indexed
+                                selectedDay = index + 1;
                               });
                             },
                             children: List.generate(days.length, (index) {
-                              return Center(child: Text('${days[index]}')); // Display day numbers
+                              return Center(child: Text('${days[index]}'));
                             }),
                           ),
                         ),
@@ -114,16 +108,16 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                       children: [
                         Text('YYYY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                         SizedBox(
-                          height: 150, // Adjust height for better visibility
+                          height: 150,
                           child: CupertinoPicker(
                             itemExtent: 50,
                             onSelectedItemChanged: (index) {
                               setState(() {
-                                selectedYear = years[index]; // Select year
+                                selectedYear = years[index];
                               });
                             },
                             children: List.generate(years.length, (index) {
-                              return Center(child: Text('${years[index]}')); // Display year
+                              return Center(child: Text('${years[index]}'));
                             }),
                           ),
                         ),
