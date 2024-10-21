@@ -80,10 +80,8 @@ class _CycleLengthScreenState extends State<CycleLengthScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    List<dynamic> cycleData = [selectedCycleLength, widget.name];
-
                     CSVManager csvManager = CSVManager();
-                    await csvManager.addToCSV(cycleData);
+                    await csvManager.addToCSV([widget.name, selectedCycleLength]);
 
                     Navigator.push(
                       context,
