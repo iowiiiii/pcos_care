@@ -19,6 +19,7 @@ class _LastPeriodScreenState extends State<LastPeriodScreen> {
   DateTime? _selectedDay;
   final CSVManager csvManager = CSVManager();
   bool _isLoading = false;
+  late UserData userData;
 
   @override
   Widget build(BuildContext context) {
@@ -94,46 +95,13 @@ class _LastPeriodScreenState extends State<LastPeriodScreen> {
                     });
 
                     try {
-                      // Create a new UserData instance with placeholder values
-                      UserData userData = UserData(
-                        name: widget.name,
-                        weight: 0, // Placeholder value
-                        height: 0, // Placeholder value
-                        bmi: 0, // Placeholder value
-                        classification: '', // Placeholder value
-                        lastPeriodDate: _selectedDay!, // User selected date
-                        age: 0, // Placeholder value
-                        cycleLength: 28, // Example placeholder for cycle length
-                        weightGain: false,
-                        hairGrowth: false,
-                        skinDarkening: false,
-                        hairLoss: false,
-                        pimples: false,
-                        fastFood: false,
-                        regularExercise: true,
-                      );
-
-                      // Assuming csvManager has a method to save user data
-                      await csvManager.addToCSV([
-                        widget.name,
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        _selectedDay!.toIso8601String(),
-                      ]);
+                      await csvManager.addToCSV([widget.name, _selectedDay!.toIso8601String()]);
 
                       // Navigate to FinishSetupScreen
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => FinishSetupScreen(
-                            name: widget.name,
-                            userData: userData,
-                          ),
+                          builder: (context) => FinishSetupScreen(name: widget.name, userData: userData),
                         ),
                       );
                     } catch (e) {
