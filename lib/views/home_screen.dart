@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 import 'package:csv/csv.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -15,13 +15,11 @@ import '../models/recommendations_model.dart';
 class HomeScreen extends StatefulWidget {
   final UserData userData;
   final List<String> symptoms;
-  final List<RecommendationItem> recommendations;
 
   const HomeScreen({
     Key? key,
     required this.userData,
-    required this.symptoms,
-    required this.recommendations,
+    required this.symptoms, required List recommendations,
   }) : super(key: key);
 
   @override
@@ -29,36 +27,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _weight = '52 KG'; // Default weight
-  double _height = 1.65; // Default height in meters
-  double _bmi = 19.9; // Default BMI value
-  String _classification = 'NORMAL'; // Default classification
-  UserData? userData; // User data variable to hold the data loaded from CSV
+  late String _weight;
+  late double _height;
+  late double _bmi;
+  late String _classification;
+  late UserData userData;
 
   @override
   void initState() {
     super.initState();
+    userData = widget.userData;
     _loadUserData();
   }
 
   Future<void> _loadUserData() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/user_data.csv';
-    final input = File(path).openRead();
-    final fields = await input
-        .transform(utf8.decoder)
-        .transform(CsvToListConverter())
-        .toList();
-
-    if (fields.isNotEmpty) {
-      setState(() {
-        _weight = '${fields[0][0]} KG';
-        _height = fields[0][1];
-        _bmi = fields[0][2];
-        _classification = fields[0][3];
-        userData = UserData.fromCsv(fields[0]);
-      });
-    }
+    setState(() {
+      _weight = '${userData.weight} KG';
+      _height = userData.height;
+      _bmi = userData.bmi;
+      _classification = userData.classification;
+    });
   }
 
   @override
@@ -194,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             _showBmiEditDialog();
                           },
                           child: Text(
-                            'Edit', 
+                            'Edit', // Clickable edit button
                             style: TextStyle(fontSize: 10, color: Colors.grey),
                           ),
                         ),
@@ -225,12 +213,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         shrinkWrap: true,
                         physics: NeverScrollableScrollPhysics(),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, 
+                          crossAxisCount: 2, // 2 items per row
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                           childAspectRatio: 1.5,
                         ),
-                        itemCount: 4, 
+                        itemCount: 4, // 4 items for phases
                         itemBuilder: (context, index) {
                           List<String> phases = [
                             'Menstrual Phase',
@@ -285,54 +273,51 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-        bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         items: [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-        BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-        BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Self-Care'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.calendar_today), label: 'Calendar'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Self-Care'),
         ],
         selectedItemColor: Color(0xFFFF6F61),
         unselectedItemColor: Colors.grey,
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            break;
-          case 1:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => CalendarScreen(
-                  //userData: userData!,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              break;
+            case 1:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CalendarScreen(
+                    userData: userData,
+                  ),
                 ),
-              ),
-            );
-            break;
-          case 2:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => SelfCareScreen(
-                  userData: userData!,
-                  symptoms: [],
-                  recommendations: [],
+              );
+              break;
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfileScreen(
+                    userData: userData, symptoms: [], recommendations: [],
+                  ),
                 ),
-              ),
-            );
-            break;
-          case 3:
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProfileScreen(
-                  userData: userData!,
-                  symptoms: [],
-                  recommendations: [],
+              );
+              break;
+            case 3:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SelfCareScreen(
+                    userData: userData,
+                    symptoms: widget.symptoms, recommendations: [],
+                  ),
                 ),
-              ),
-            );
-            break;
-        }
+              );
+              break;
+          }
         },
       ),
     );
