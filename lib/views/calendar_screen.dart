@@ -3,6 +3,10 @@ import 'package:pcos_care/views/edit_period_days.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import '../controller/csv_manager.dart';
+import 'home_screen.dart';
+import 'profile_screen.dart';
+import 'selfcare_screen.dart';
+import '../models/user_data_model.dart';
 
 class CalendarScreen extends StatefulWidget {
   @override
@@ -10,6 +14,7 @@ class CalendarScreen extends StatefulWidget {
 }
 
 class _CalendarScreenState extends State<CalendarScreen> {
+  late UserData userData;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
@@ -22,6 +27,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   bool _isScrollSheetVisible = true;
   CSVManager csvManager = CSVManager();
+  
+  int _selectedIndex = 1;
 
   @override
   void initState() {
@@ -145,7 +152,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           "Vaginal itching", "Vaginal burning",
                         ], isSingleSelection: false),
                         ElevatedButton(
-                          onPressed: saveDataToCSV, 
+                          onPressed: saveDataToCSV,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color.fromRGBO(255, 111, 97, 1),
                             shape: RoundedRectangleBorder(
@@ -161,6 +168,59 @@ class _CalendarScreenState extends State<CalendarScreen> {
               },
             ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Color(0xFF262626),
+        selectedItemColor: Color(0xFFD4A5A5),
+        unselectedItemColor: Color(0xFFACACBA),
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex, // Set the current index here
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Calendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Self-Care',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        onTap: (index) {
+          setState(() {
+            _selectedIndex = index; // Update the selected index
+          });
+          switch (index) {
+            case 0:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeScreen(userData: userData, symptoms: [], recommendations: [],)),
+              );
+              break;
+            case 1:
+            // Stay on CalendarScreen
+              break;
+            case 2:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => SelfCareScreen(userData: userData, symptoms: [], recommendations: [],)),
+              );
+              break;
+            case 3:
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileScreen(userData: userData, symptoms: [], recommendations: [],)),
+              );
+              break;
+          }
+        },
       ),
     );
   }
