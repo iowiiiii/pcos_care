@@ -48,23 +48,32 @@ class _CycleLengthScreenState extends State<CycleLengthScreen> {
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
-              Row(
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: CupertinoPicker(
-                      itemExtent: 50,
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          selectedCycleLength = index + 1;
-                        });
-                      },
-                      children: List.generate(cycle.length, (index) {
-                        return Center(child: Text('${index + 1} days'));
-                      }),
-                    ),
+                  Icon(Icons.arrow_drop_up, size: 32), // Arrow pointing up
+                  SizedBox(height: 10), // Spacing between arrow and text
+                  Text(
+                    '$selectedCycleLength days',
+                    style: TextStyle(fontSize: 24),
                   ),
+                  SizedBox(height: 10), // Spacing between text and arrow
+                  Icon(Icons.arrow_drop_down, size: 32), // Arrow pointing down
                 ],
+              ),
+              SizedBox(height: 20), // Space below the arrows
+              Expanded(
+                child: CupertinoPicker(
+                  itemExtent: 50,
+                  onSelectedItemChanged: (index) {
+                    setState(() {
+                      selectedCycleLength = index + 1;
+                    });
+                  },
+                  children: List.generate(cycle.length, (index) {
+                    return Center(child: Text('${index + 1} days'));
+                  }),
+                ),
               ),
               Spacer(),
               SizedBox(
