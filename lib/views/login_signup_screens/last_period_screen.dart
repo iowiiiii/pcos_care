@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../controller/csv_manager.dart';
 import '../../controller/step_progress_indicator.dart';
 import 'finish_setup_screen.dart';
+import '../../models/user_data_model.dart';
 
 class LastPeriodScreen extends StatefulWidget {
   final String name;
@@ -15,10 +16,9 @@ class LastPeriodScreen extends StatefulWidget {
 
 class _LastPeriodScreenState extends State<LastPeriodScreen> {
   DateTime _focusedDay = DateTime.now();
-  List<DateTime> _selectedDays = [];
+  DateTime? _selectedDay;
   final CSVManager csvManager = CSVManager();
-
-  get userData => null;
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +30,15 @@ class _LastPeriodScreenState extends State<LastPeriodScreen> {
             Navigator.pop(context);
           },
         ),
-        title: Text('Setup Your Profile', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          'Setup Your Profile',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        backgroundColor: Color.fromRGBO(230, 230, 250, 100),
+        backgroundColor: Color.fromRGBO(230, 230, 250, 1),
       ),
       body: Material(
-        color: Color.fromRGBO(230, 230, 250, 100),
+        color: Color.fromRGBO(230, 230, 250, 1),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -48,29 +51,24 @@ class _LastPeriodScreenState extends State<LastPeriodScreen> {
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
-              // Calendar Widget
               TableCalendar(
                 firstDay: DateTime.utc(2010, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
+                lastDay: DateTime.now(),
                 focusedDay: _focusedDay,
-                calendarFormat: CalendarFormat.month,
-                selectedDayPredicate: (day) {
-                  return _selectedDays.contains(day);
-                },
+                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                 onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
-                    if (_selectedDays.contains(selectedDay)) {
-                      _selectedDays.remove(selectedDay);
-                    } else {
-                      _selectedDays.add(selectedDay);
-                    }
-                    _focusedDay = focusedDay; 
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
                   });
                 },
                 calendarStyle: CalendarStyle(
-                  isTodayHighlighted: true,
                   selectedDecoration: BoxDecoration(
                     color: Colors.redAccent,
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: Colors.blueAccent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -79,22 +77,83 @@ class _LastPeriodScreenState extends State<LastPeriodScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () async {
-                    List<String> periodDates = _selectedDays.map((day) => day.toIso8601String()).toList();
-                    
-                    await csvManager.addToCSV([widget.name, '', '', '', '', '', '', '', periodDates.join(', ')]);
-                    
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => FinishSetupScreen(name: widget.name, userData: userData,),
-                      ),
-                    );
+                  onPressed: _isLoading
+                      ? null
+                      : () async {
+                    if (_selectedDay == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Please select a date.'),
+                        ),
+                      );
+                      return;
+                    }
+
+                    setState(() {
+                      _isLoading = true;
+                    });
+
+                    try {
+                      // Create a new UserData instance with placeholder values
+                      UserData userData = UserData(
+                        name: widget.name,
+                        weight: 0, // Placeholder value
+                        height: 0, // Placeholder value
+                        bmi: 0, // Placeholder value
+                        classification: '', // Placeholder value
+                        lastPeriodDate: _selectedDay!, // User selected date
+                        age: 0, // Placeholder value
+                        cycleLength: 28, // Example placeholder for cycle length
+                        weightGain: false,
+                        hairGrowth: false,
+                        skinDarkening: false,
+                        hairLoss: false,
+                        pimples: false,
+                        fastFood: false,
+                        regularExercise: true,
+                      );
+
+                      // Assuming csvManager has a method to save user data
+                      await csvManager.addToCSV([
+                        widget.name,
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        _selectedDay!.toIso8601String(),
+                      ]);
+
+                      // Navigate to FinishSetupScreen
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FinishSetupScreen(
+                            name: widget.name,
+                            userData: userData,
+                          ),
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('An error occurred. Please try again.'),
+                        ),
+                      );
+                    } finally {
+                      setState(() {
+                        _isLoading = false;
+                      });
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 111, 97, 100),
+                    backgroundColor: Color.fromRGBO(255, 111, 97, 1),
                   ),
-                  child: Text('Next'),
+                  child: _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Next'),
                 ),
               ),
             ],
