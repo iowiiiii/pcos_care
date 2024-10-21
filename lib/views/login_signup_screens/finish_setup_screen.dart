@@ -16,14 +16,13 @@ class _FinishSetupScreenState extends State<FinishSetupScreen> {
   @override
   void initState() {
     super.initState();
-    // Automatically navigate to the home screen after 3 seconds
     Future.delayed(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (context) => HomeScreen(
             userData: widget.userData,
-            symptoms: widget.userData.symptoms ?? [], // Use an empty list if null
+            symptoms: widget.userData.symptoms ?? [],
             recommendations: [],
           ),
         ),
