@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../controller/step_progress_indicator.dart';
 import 'period_duration_screen.dart';
 import '../../controller/csv_manager.dart';
+import '../../controller/step_progress_indicator.dart';
 
 class HeightScreen extends StatefulWidget {
   final String name;
@@ -79,13 +79,13 @@ class _HeightScreenState extends State<HeightScreen> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color.fromRGBO(70, 80, 90, 245),
-                  hintText: 'Your Height (e.g., 6\'0 or 180)',
+                  hintText: 'Your Height (e.g., 180 or 6\'0")',
                   errorText: _isHeightValid ? null : 'Please enter a valid height',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                keyboardType: TextInputType.text, // Allow text input for the quote
+                keyboardType: TextInputType.text, // Allow text input for the height
               ),
               Spacer(),
               SizedBox(
@@ -99,25 +99,23 @@ class _HeightScreenState extends State<HeightScreen> {
                     if (_isHeightValid) {
                       double height;
                       if (isCmSelected) {
-                        height = double.parse(_heightController.text); // Directly parse cm
+                        height = double.parse(_heightController.text);
                       } else {
-                        // For feet input, just remove the quote and parse
                         final input = _heightController.text.replaceAll("'", "").trim();
-                        height = double.parse(input); // Parse as feet directly
+                        height = double.parse(input);
                       }
 
-                      double heightInMeters = isCmSelected ? height / 100 : height * 0.3048; // Convert to meters
+                      double heightInMeters = isCmSelected ? height / 100 : height * 0.3048;
                       bmi = calculateBMI(widget.weight, heightInMeters); // Calculate BMI
 
                       if (bmi != null) {
                         CSVManager csvManager = CSVManager();
-
-                        await csvManager.addHeightAndBmiToCSV(widget.name, widget.age, heightInMeters, bmi!);
+                        await csvManager.addHeightAndBmiToCSV(widget.name, heightInMeters, bmi!);
 
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => PeriodDurationScreen(name: widget.name, bmi: bmi!), // Pass BMI
+                            builder: (context) => PeriodDurationScreen(name: widget.name, bmi: bmi!),
                           ),
                         );
                       }
@@ -138,10 +136,9 @@ class _HeightScreenState extends State<HeightScreen> {
 
   bool _validateHeight(String input) {
     if (isCmSelected) {
-      return double.tryParse(input) != null; // For cm, validate as a number
+      return double.tryParse(input) != null;
     } else {
-      // For feet, ensure it contains a quote mark
-      return input.contains("'") && input.split("'").length == 2; // Check for proper feet format
+      return input.contains("'") && input.split("'").length == 2;
     }
   }
 
