@@ -16,6 +16,7 @@ class WeightScreen extends StatefulWidget {
 class _WeightScreenState extends State<WeightScreen> {
   bool isKgSelected = true;
   final TextEditingController _weightController = TextEditingController();
+  bool _isWeightValid = true; // To track weight validity
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +78,7 @@ class _WeightScreenState extends State<WeightScreen> {
                   filled: true,
                   fillColor: Color.fromRGBO(70, 80, 90, 245),
                   hintText: 'Your Weight',
+                  errorText: _isWeightValid ? null : 'Please enter a valid weight',
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,
@@ -86,24 +88,31 @@ class _WeightScreenState extends State<WeightScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    double weight = double.tryParse(_weightController.text) ?? 0.0;
+                    setState(() {
+                      _isWeightValid = _validateWeight(_weightController.text);
+                    });
 
-                    CSVManager csvManager = CSVManager();
+                    if (_isWeightValid) {
+                      double weight = double.parse(_weightController.text);
 
-                    await csvManager.addWeightToCSV(widget.name, weight);
+                      CSVManager csvManager = CSVManager();
 
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HeightScreen(
-                          name: widget.name,
-                          age: widget.age, weight: weight,
+                      await csvManager.addWeightToCSV(widget.name, weight);
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HeightScreen(
+                            name: widget.name,
+                            age: widget.age,
+                            weight: weight,
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 111, 97, 100),
+                    backgroundColor: Color.fromRGBO(255, 111, 97, 1),
                   ),
                   child: Text('Next', style: TextStyle(color: Colors.white70)),
                 ),
@@ -113,6 +122,12 @@ class _WeightScreenState extends State<WeightScreen> {
         ),
       ),
     );
+  }
+
+  bool _validateWeight(String input) {
+    // Validate if the input is a valid number greater than 0
+    final weight = double.tryParse(input);
+    return weight != null && weight > 0;
   }
 
   Widget _buildToggleButton({
