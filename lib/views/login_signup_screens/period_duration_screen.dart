@@ -52,17 +52,17 @@ class _PeriodDurationScreenState extends State<PeriodDurationScreen> {
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.arrow_drop_up, size: 32), // Arrow pointing up
-                  SizedBox(height: 10), // Spacing between arrow and text
+                  Icon(Icons.arrow_drop_up, size: 32), 
+                  SizedBox(height: 10),
                   Text(
                     '$selectedPeriodLength days',
                     style: TextStyle(fontSize: 24),
                   ),
-                  SizedBox(height: 10), // Spacing between text and arrow
-                  Icon(Icons.arrow_drop_down, size: 32), // Arrow pointing down
+                  SizedBox(height: 10),
+                  Icon(Icons.arrow_drop_down, size: 32),
                 ],
               ),
-              SizedBox(height: 20), // Space below the arrows
+              SizedBox(height: 20),
               Expanded(
                 child: CupertinoPicker(
                   itemExtent: 50,
@@ -81,10 +81,8 @@ class _PeriodDurationScreenState extends State<PeriodDurationScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    List<dynamic> periodData = [selectedPeriodLength, widget.name];
-
                     CSVManager csvManager = CSVManager();
-                    await csvManager.addToCSV(periodData);
+                    await csvManager.addToCSV([widget.name, selectedPeriodLength]);
 
                     Navigator.push(
                       context,
