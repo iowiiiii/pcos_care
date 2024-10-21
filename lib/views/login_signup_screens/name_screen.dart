@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../controller/step_progress_indicator.dart';
 import 'birthday_screen.dart';
+import '../../controller/csv_manager.dart';
 
 class NameScreen extends StatefulWidget {
   @override
@@ -10,6 +11,8 @@ class NameScreen extends StatefulWidget {
 class _NameScreenState extends State<NameScreen> {
   final TextEditingController _nameController = TextEditingController();
   bool _isNameValid = true;
+
+  CSVManager csvManager = CSVManager();
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +62,7 @@ class _NameScreenState extends State<NameScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_nameController.text.isEmpty) {
                       setState(() {
                         _isNameValid = false;
@@ -68,6 +71,10 @@ class _NameScreenState extends State<NameScreen> {
                       setState(() {
                         _isNameValid = true;
                       });
+
+                      // Initialize the CSV with the user's name
+                      await csvManager.initializeCSV(_nameController.text);
+
                       Navigator.push(
                         context,
                         MaterialPageRoute(
