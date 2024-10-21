@@ -18,6 +18,7 @@ class _HeightScreenState extends State<HeightScreen> {
   bool isCmSelected = true;
   final TextEditingController _heightController = TextEditingController();
   double? bmi;
+  bool _isHeightValid = true;  // To track height validity
 
   @override
   Widget build(BuildContext context) {
@@ -78,35 +79,52 @@ class _HeightScreenState extends State<HeightScreen> {
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color.fromRGBO(70, 80, 90, 245),
-                  hintText: 'Your Height',
-                  border: OutlineInputBorder(),
+                  hintText: 'Your Height (e.g., 6\'0 or 180)',
+                  errorText: _isHeightValid ? null : 'Please enter a valid height',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                keyboardType: TextInputType.number,
+                keyboardType: TextInputType.text, // Allow text input for the quote
               ),
               Spacer(),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    double height = double.tryParse(_heightController.text) ?? 0;
-                    double heightInMeters = isCmSelected ? height / 100 : height * 0.3048; // Convert ft to m
-                    bmi = calculateBMI(widget.weight, heightInMeters); // Calculate BMI
+                    setState(() {
+                      _isHeightValid = _validateHeight(_heightController.text);
+                    });
 
-                    if (bmi != null) {
-                      CSVManager csvManager = CSVManager();
+                    if (_isHeightValid) {
+                      double height;
+                      if (isCmSelected) {
+                        height = double.parse(_heightController.text); // Directly parse cm
+                      } else {
+                        // For feet input, just remove the quote and parse
+                        final input = _heightController.text.replaceAll("'", "").trim();
+                        height = double.parse(input); // Parse as feet directly
+                      }
 
-                      await csvManager.addHeightAndBmiToCSV(widget.name, widget.age, heightInMeters, bmi!);
+                      double heightInMeters = isCmSelected ? height / 100 : height * 0.3048; // Convert to meters
+                      bmi = calculateBMI(widget.weight, heightInMeters); // Calculate BMI
 
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PeriodDurationScreen(name: widget.name, bmi: bmi!), // Pass BMI
-                        ),
-                      );
+                      if (bmi != null) {
+                        CSVManager csvManager = CSVManager();
+
+                        await csvManager.addHeightAndBmiToCSV(widget.name, widget.age, heightInMeters, bmi!);
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PeriodDurationScreen(name: widget.name, bmi: bmi!), // Pass BMI
+                          ),
+                        );
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 111, 97, 100),
+                    backgroundColor: Color.fromRGBO(255, 111, 97, 1),
                   ),
                   child: Text('Next', style: TextStyle(color: Colors.white70)),
                 ),
@@ -116,6 +134,15 @@ class _HeightScreenState extends State<HeightScreen> {
         ),
       ),
     );
+  }
+
+  bool _validateHeight(String input) {
+    if (isCmSelected) {
+      return double.tryParse(input) != null; // For cm, validate as a number
+    } else {
+      // For feet, ensure it contains a quote mark
+      return input.contains("'") && input.split("'").length == 2; // Check for proper feet format
+    }
   }
 
   double calculateBMI(double weight, double height) {
