@@ -97,8 +97,10 @@ class _WeightScreenState extends State<WeightScreen> {
 
                       CSVManager csvManager = CSVManager();
 
+                      // Save the weight in CSV
                       await csvManager.addWeightToCSV(widget.name, weight);
 
+                      // Navigate to HeightScreen
                       Navigator.push(
                         context,
                         MaterialPageRoute(
