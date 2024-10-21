@@ -20,6 +20,10 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
 
   List<int> days = List.generate(31, (index) => index + 1);
   List<int> years = List.generate(100, (index) => DateTime.now().year - index);
+  List<String> months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
 
   CSVManager csvManager = CSVManager();
 
@@ -51,52 +55,79 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
             children: [
               SizedBox(height: 20),
               StepProgressIndicator(currentStep: 2),
-              SizedBox(height: 210),
+              SizedBox(height: 20),
               Text(
                 'When is your birthday?',
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 65),
+              SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Month Picker
                   Expanded(
-                    child: CupertinoPicker(
-                      itemExtent: 50,
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          selectedMonth = index + 1;
-                        });
-                      },
-                      children: List.generate(12, (index) {
-                        return Center(child: Text('${index + 1}'));
-                      }),
+                    child: Column(
+                      children: [
+                        Text('MM', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 150, // Adjust height for better visibility
+                          child: CupertinoPicker(
+                            itemExtent: 50,
+                            onSelectedItemChanged: (index) {
+                              setState(() {
+                                selectedMonth = index + 1; // Months are 1-indexed
+                              });
+                            },
+                            children: List.generate(months.length, (index) {
+                              return Center(child: Text(months[index])); // Display month names
+                            }),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  // Day Picker
                   Expanded(
-                    child: CupertinoPicker(
-                      itemExtent: 50,
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          selectedDay = index + 1;
-                        });
-                      },
-                      children: List.generate(days.length, (index) {
-                        return Center(child: Text('${days[index]}'));
-                      }),
+                    child: Column(
+                      children: [
+                        Text('DD', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 150, // Adjust height for better visibility
+                          child: CupertinoPicker(
+                            itemExtent: 50,
+                            onSelectedItemChanged: (index) {
+                              setState(() {
+                                selectedDay = index + 1; // Days are 1-indexed
+                              });
+                            },
+                            children: List.generate(days.length, (index) {
+                              return Center(child: Text('${days[index]}')); // Display day numbers
+                            }),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                  // Year Picker
                   Expanded(
-                    child: CupertinoPicker(
-                      itemExtent: 50,
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          selectedYear = years[index];
-                        });
-                      },
-                      children: List.generate(years.length, (index) {
-                        return Center(child: Text('${years[index]}'));
-                      }),
+                    child: Column(
+                      children: [
+                        Text('YYYY', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        SizedBox(
+                          height: 150, // Adjust height for better visibility
+                          child: CupertinoPicker(
+                            itemExtent: 50,
+                            onSelectedItemChanged: (index) {
+                              setState(() {
+                                selectedYear = years[index]; // Select year
+                              });
+                            },
+                            children: List.generate(years.length, (index) {
+                              return Center(child: Text('${years[index]}')); // Display year
+                            }),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -110,7 +141,6 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                     int age = csvManager.calculateAge(birthday);
                     await csvManager.addBirthdayAndAge(birthday);
 
-
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -118,7 +148,7 @@ class _BirthdayScreenState extends State<BirthdayScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromRGBO(255, 111, 97, 100),
+                    backgroundColor: Color.fromRGBO(255, 111, 97, 1),
                   ),
                   child: Text('Next', style: TextStyle(color: Colors.white70)),
                 ),
