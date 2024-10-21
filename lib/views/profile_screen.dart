@@ -45,7 +45,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           MaterialPageRoute(
             builder: (context) =>
                 CalendarScreen(
-                  //userData: widget.userData,
+                  userData: widget.userData,
                 ),
           ),
         );
@@ -78,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Image.asset('assets/logo.png'), 
+          child: Image.asset('assets/logo.png'),
         ),
       ),
       body: Padding(
@@ -128,7 +128,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
         selectedItemColor: Color(0xFFFF6F61),
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped, 
+        onTap: _onItemTapped,
       ),
     );
   }
@@ -137,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       Widget destination, String? data) {
     return ListTile(
       leading: const Icon(Icons.star_border),
-      title: Text('$title: ${data ?? "Not set"}'), 
+      title: Text('$title: ${data ?? "Not set"}'),
       trailing: const Icon(Icons.chevron_right),
       onTap: () {
         Navigator.push(
